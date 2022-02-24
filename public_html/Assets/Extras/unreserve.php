@@ -1,8 +1,10 @@
+<?php
+session_start();
+?>
 <h2>Please wait for a moment, your book is being removed</h2>
 <?php
 include("database.php");
 
-session_start();
 $_SESSION["numOfResults"] = null;
 
 if (isset($_GET["ISBN"]) && isset($_SESSION["username"])) {
@@ -15,7 +17,7 @@ if (isset($_GET["ISBN"]) && isset($_SESSION["username"])) {
     if ($conn->query($query) === true && $conn->query($query2) === true) {
         echo "Success";
         $conn->close();
-        header("Location:  	/webD/Assignment/main.php");
+        echo "<script> location.replace(\"../../main.php\"); </script>";
     }
     else {
         die("Error: " . $sql . "<br>" . $conn->error);

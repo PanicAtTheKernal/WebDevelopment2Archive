@@ -1,3 +1,10 @@
+<?php
+	session_start();
+	if ($_SESSION["redirect"] == TRUE) {
+		$_SESSION["redirect"] = FALSE;
+		// exit(header("Location: /main.php"));
+	}
+?>
 <!DOCTYPE html>
 <html>
 	<head>
@@ -6,7 +13,7 @@
         <title>Sign in</title>
 	</head>
 	<body>
-		<?php 
+<?php 
 			include("Assets/Extras/header.php");
 		?>
 		<div id="mainContent">
@@ -15,7 +22,11 @@
 				include("Assets/Extras/database.php");
 				?>
 			<div id="errorBox">
-				<?php 
+<?php 
+                    if ($conn->connect_error)  {
+                        die("Connection Failed:" . $conn->connect_error . "<br>");
+                    }
+
 					 //Checks if the username and password are submitted in the from 
 					if (isset($_POST["username"]) && isset($_POST["password"])) {
 						$user = htmlspecialchars($_POST["username"]);
@@ -28,10 +39,12 @@
 						//If the database return a single line then it means that the users credentials are in the database and forwards them to the main page
 						if ($result->num_rows == 1) {
 							$_SESSION["username"] = $user;
-							header("Location:  	/webD/Assignment/main.php");
+							$GLOBALS["redirect"] = TRUE;
+							echo "<script> location.replace(\"main.php\"); </script>";
 						}
 						else {
 							printErrorBox("Please check that username and password is correct.");
+							$GLOBALS["redirect"] = FALSE;
 						}
 					}	
 				?>
@@ -54,9 +67,8 @@
 				</form>
 			</div>
 		</div>
-			<?php
+<?php
             	include("Assets/Extras/footer.php");
 			?>
 	</body>
-	</html>
-	
+</html>

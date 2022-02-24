@@ -1,3 +1,10 @@
+<?php
+	session_start();
+	if ($_SESSION["redirect"] == TRUE) {
+		$_SESSION["redirect"] = FALSE;
+		// exit(header("Location: /index.php"));
+	}
+?>
 <!DOCTYPE html>
 <html>
 	<head>
@@ -22,7 +29,7 @@
                                 "<td>".$row["ISBN"]."</td>".
                                 "<td>".$row["BookTitle"]."</td>".
                                 "<td>".$row["ReservedDate"]."</td>".
-                                "<td><a href=\"Assets/unreserve.php?ISBN=".$row["ISBN"]."\">Remove</a></td>".
+                                "<td><a href=\"Assets/Extras/unreserve.php?ISBN=".$row["ISBN"]."\">Remove</a></td>".
                                 "</tr>"; 
                         }
                     }
@@ -43,13 +50,15 @@
 
                     
                     if ($category === "...") {
-                        $query = "SELECT Books.ISBN, Books.BookTitle, Books.Author, Books.Edition, Books.Year, Category.CategoryDescription, Books.Reserverd FROM Books JOIN Category ON Category.CategoryID = Books.Category WHERE Books.BookTitle LiKE '%$search%' OR Books.Author LIKE '%$search%'";
+                        $query = "SELECT books.ISBN, books.BookTitle, books.Author, books.Edition, books.Year, category.CategoryDescription, books.Reserverd FROM books JOIN category ON category.CategoryID = books.Category WHERE books.BookTitle LiKE '%$search%' OR books.Author LIKE '%$search%'";
                     }
                     else {
-                        $query = "SELECT Books.ISBN, Books.BookTitle, Books.Author, Books.Edition, Books.Year, Category.CategoryDescription, Books.Reserverd FROM Books JOIN Category ON Category.CategoryID = Books.Category WHERE (Books.BookTitle LiKE '%$search%' OR Books.Author LIKE '%$search%') AND Books.Category LIKE '$category'";
+                        $query = "SELECT books.ISBN, books.BookTitle, books.Author, books.Edition, books.Year, category.CategoryDescription, books.Reserverd FROM books JOIN category ON category.CategoryID = books.Category WHERE (books.BookTitle LiKE '%$search%' OR books.Author LIKE '%$search%') AND books.Category LIKE '$category'";
                     }
 
                     $result = $serverConn->query($query);
+
+                    echo $serverConn->error;
 
                     if ($result->num_rows > 0) {
                         $rowCount = 0;
@@ -61,13 +70,13 @@
                         $numOfResults = ceil($result->num_rows / 5);
 
                         $_SESSION["numOfResults"] = $numOfResults;
-                        $totalBooks = array();
+                        $totalbooks = array();
                         for ($i=0; $i < $numOfResults; $i++) { 
                             $tableRows = array();
                             $rowCount = 0;
                             while ($rowCount < 5) {
                                 $row = $result->fetch_assoc();
-                                $reseveLink = ($row["Reserverd"] === "N") ? "<td><a href=\"Assets/reserve.php?ISBN=".$row["ISBN"]."\">Reserve</a></td>": "<td></td>";
+                                $reseveLink = ($row["Reserverd"] === "N") ? "<td><a href=\"Assets/Extras/reserve.php?ISBN=".$row["ISBN"]."\">Reserve</a></td>": "<td></td>";
                                 $tableRows[] = "<tr>". 
                                 "<td>".$row["ISBN"]."</td>".
                                 "<td>".$row["BookTitle"]."</td>".
@@ -79,11 +88,11 @@
                                 $reseveLink."</tr>"; 
                                 $rowCount += 1;
                             }
-                            $totalBooks[] = $tableRows;                            
+                            $totalbooks[] = $tableRows;                            
 
                             
                         }
-                        $_SESSION["books"] = $totalBooks;
+                        $_SESSION["books"] = $totalbooks;
 
                     }
                     
@@ -97,7 +106,7 @@
             
             //This gets the categories for the dropdown menu in the search area
             function getCatergories($serverConn) {
-                $query = "SELECT * FROM Category";
+                $query = "SELECT * FROM category";
                 
                 $result = $serverConn->query($query);
                 
@@ -118,7 +127,8 @@
             
             //This will redirect the user to the login page if they try to access the main page without logging in 
             if (!isset($_SESSION["username"])) {
-                header("Location:  	/webD/Assignment/index.php");
+                $_SESSION["redirect"] = TRUE;
+                echo "<script> location.replace(\"index.php\"); </script>";
             }
             
 

@@ -1,0 +1,34 @@
+version: "3.2"
+services:
+  php:
+    build: './php/'
+    networks:
+      - backend
+    volumes:
+      - ./public_html/:/var/www/html/
+  apache:
+    build: './apache/'
+    depends_on:
+      - php
+      - mysql
+    networks:
+      - frontend
+      - backend
+    ports:
+      - "8080:80"
+    volumes:
+      - ./public_html/:/var/www/html/
+  mysql:
+    image: mariadb:10.4.22
+    networks:
+      - backend
+    volumes:
+      - ./data/database.sql:/docker-entrypoint-initdb.d/database.sql 
+    environment:
+      - MYSQL_DATABASE=Assginment
+      - MYSQL_ROOT_PASSWORD=
+      - MYSQL_USER=root
+      - MYSQL_ALLOW_EMPTY_PASSWORD=yes
+networks:
+  frontend:
+  backend:
